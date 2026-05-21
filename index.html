@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Surprise</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+      color: white;
+      background: radial-gradient(circle at top, #ffb6d9 0%, #ff72ad 35%, #7b2ff7 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35), transparent 18%),
+        radial-gradient(circle at 80% 15%, rgba(255,255,255,0.25), transparent 17%),
+        radial-gradient(circle at 50% 90%, rgba(255,255,255,0.25), transparent 20%);
+      pointer-events: none;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 24px;
+      animation: fadeIn 0.8s ease;
+      z-index: 2;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .glass-card {
+      width: min(92vw, 720px);
+      padding: 34px 24px;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 20px 80px rgba(50,0,90,0.35);
+      backdrop-filter: blur(16px);
+    }
+
+    #countdown {
+      font-size: clamp(90px, 22vw, 180px);
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0 14px 35px rgba(0,0,0,0.28);
+      animation: pop 1s infinite;
+    }
+
+    @keyframes pop {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.12);
+      }
+    }
+
+    .loading {
+      margin-top: 20px;
+      font-size: clamp(22px, 5vw, 36px);
+      font-weight: 800;
+    }
+
+    .main-title {
+      font-size: clamp(30px, 7vw, 58px);
+      line-height: 1.08;
+      font-weight: 900;
+      text-shadow: 0 10px 35px rgba(0,0,0,0.25);
+    }
+
+    .sub-title {
+      margin-top: 18px;
+      font-size: clamp(22px, 5vw, 38px);
+      font-weight: 800;
+      color: #fff7c8;
+    }
+
+    .small-text {
+      margin-top: 16px;
+      font-size: clamp(15px, 3.4vw, 19px);
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    .cake-area {
+      width: min(92vw, 550px);
+      min-height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 22px;
+    }
+
+    .cake-wrap {
+      width: min(72vw, 320px);
+      filter: drop-shadow(0 25px 35px rgba(40,0,80,0.35));
+      animation: floatCake 2.8s ease-in-out infinite;
+      transition: transform 0.9s ease;
+    }
+
+    @keyframes floatCake {
+      0%, 100% {
+        transform: translateY(0) rotate(-1.5deg);
+      }
+      50% {
+        transform: translateY(-18px) rotate(1.5deg);
+      }
+    }
+
+    .cake-svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .knife-line {
+      position: fixed;
+      width: 0;
+      height: 5px;
+      left: 50%;
+      top: 50%;
+      background: linear-gradient(90deg, transparent, white, #ffe66d, transparent);
+      box-shadow: 0 0 25px white;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      border-radius: 99px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+    }
+
+    .knife-line.cut {
+      animation: knifeCut 0.65s ease forwards;
+    }
+
+    @keyframes knifeCut {
+      0% {
+        width: 0;
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      100% {
+        width: 120vw;
+        opacity: 0;
+      }
+    }
+
+    .birthday-line {
+      margin-top: 10px;
+      font-size: clamp(34px, 8vw, 64px);
+      font-weight: 950;
+      color: #fff7c8;
+      text-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      animation: heartBeat 1.3s ease infinite;
+    }
+
+    @keyframes heartBeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(1.08);
+      }
+      65% {
+        transform: scale(0.98);
+      }
+    }
+
+    .btn {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 15px 30px;
+      border-radius: 999px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #8a1454;
+      background: linear-gradient(135deg, #fff9c7, white, #ffd1ec);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.28);
+      transition: 0.25s ease;
+      margin-top: 18px;
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    }
+
+    .next-btn {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translateX(-50%);
+      z-index: 20;
+      margin-top: 0;
+    }
+
+    .photo-frame {
+      width: min(90vw, 430px);
+      height: min(62vh, 520px);
+      margin: 22px auto 18px;
+      padding: 12px;
+      border-radius: 34px;
+      background: rgba(255,255,255,0.28);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 20px 70px rgba(40,0,80,0.35);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .photo-frame::before {
+      content: "💖";
+      position: absolute;
+      top: 13px;
+      right: 18px;
+      z-index: 3;
+      font-size: 30px;
+      animation: popHeart 1.4s ease infinite;
+    }
+
+    @keyframes popHeart {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.25);
+      }
+    }
+
+    #slideImage {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 25px;
+      transition: opacity 0.35s ease;
+      animation: photoZoom 5s ease infinite;
+      background: rgba(255,255,255,0.08);
+    }
+
+    @keyframes photoZoom {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.04);
+      }
+    }
+
+    .message-card {
+      width: min(92vw, 850px);
+      max-height: 82vh;
+      overflow-y: auto;
+      padding: 34px 26px;
+      border-radius: 34px;
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.38);
+      box-shadow: 0 25px 80px rgba(40,0,80,0.38);
+      backdrop-filter: blur(18px);
+    }
+
+    .message-card h1 {
+      font-size: clamp(28px, 6vw, 48px);
+      margin-bottom: 20px;
+      color: #fff7c8;
+    }
+
+    .message-card p {
+      font-size: clamp(16px, 3.8vw, 21px);
+      line-height: 1.85;
+      text-align: left;
+      color: white;
+    }
+
+    .purvii-card {
+      width: min(92vw, 760px);
+      padding: 28px 20px;
+      border-radius: 34px;
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.38);
+      box-shadow: 0 25px 80px rgba(40,0,80,0.38);
+      backdrop-filter: blur(18px);
+    }
+
+    .purvii-title {
+      font-size: clamp(34px, 8vw, 68px);
+      font-weight: 950;
+      color: #fff7c8;
+      text-shadow: 0 12px 35px rgba(0,0,0,0.35);
+      margin-bottom: 20px;
+      animation: heartBeat 1.2s ease infinite;
+    }
+
+    .purvii-img {
+      width: min(82vw, 360px);
+      height: min(58vh, 500px);
+      object-fit: cover;
+      border-radius: 30px;
+      border: 5px solid rgba(255,255,255,0.75);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .end-text {
+      font-size: clamp(55px, 16vw, 130px);
+      font-weight: 950;
+      color: #fff7c8;
+      text-shadow: 0 16px 45px rgba(0,0,0,0.38);
+      animation: heartBeat 1.4s ease infinite;
+    }
+
+    .emoji-rain span {
+      position: fixed;
+      top: -40px;
+      font-size: 22px;
+      pointer-events: none;
+      animation: fall linear infinite;
+      opacity: 0.9;
+      z-index: 1;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(360deg);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .glass-card,
+      .message-card,
+      .purvii-card {
+        padding: 26px 18px;
+      }
+
+      .cake-area {
+        min-height: 300px;
+      }
+
+      .btn {
+        padding: 13px 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <audio id="birthdayMusic">
+    <source src="birthday_song.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="emoji-rain" id="emojiRain"></div>
+
+  <!-- PAGE 1: Countdown -->
+  <section class="page active" id="countdownPage">
+    <div class="glass-card">
+      <div id="countdown">5</div>
+      <div class="loading hide" id="loadingText">
+        Loading your birthday surprise... 🎁✨💖
+      </div>
+      <h1 class="main-title hide" id="bornText">
+        My bestfriend was born 20 years ago today! 🥹💗
+      </h1>
+      <h2 class="sub-title hide" id="youText">
+        Yes, it’s you! 🫶
+      </h2>
+    </div>
+  </section>
+
+  <!-- PAGE 2: Cake Cut -->
+  <section class="page" id="cakePage">
+    <div class="glass-card">
+      <h1 class="main-title">Swipe anywhere to cut the cake 🎂</h1>
+      <p class="small-text">
+        Touch the screen and swipe anywhere. A little birthday magic is waiting for you ✨
+      </p>
+
+      <div class="cake-area">
+        <div class="cake-wrap" id="cakeWrap">
+          <svg class="cake-svg" viewBox="0 0 420 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="cakeBase" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff74b8"/>
+                <stop offset="1" stop-color="#ff2d89"/>
+              </linearGradient>
+
+              <linearGradient id="cream" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fff7fb"/>
+                <stop offset="1" stop-color="#ffd1ec"/>
+              </linearGradient>
+
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#6e0058" flood-opacity="0.35"/>
+              </filter>
+            </defs>
+
+            <g filter="url(#shadow)">
+              <path d="M75 165 C85 132 335 132 345 165 L330 288 C326 313 94 313 90 288 Z" fill="url(#cakeBase)"/>
+              <path d="M75 165 C85 128 335 128 345 165 C333 198 87 198 75 165 Z" fill="url(#cream)"/>
+              <path d="M105 184 C115 220 145 182 158 212 C171 242 198 196 214 222 C232 252 260 202 276 226 C292 250 318 213 330 190 L330 230 L92 230 L90 190 Z" fill="#fff0f8"/>
+              
+              <circle cx="128" cy="157" r="9" fill="#ff4b98"/>
+              <circle cx="180" cy="148" r="8" fill="#ffd166"/>
+              <circle cx="237" cy="151" r="8" fill="#8affd2"/>
+              <circle cx="293" cy="158" r="9" fill="#b9a7ff"/>
+
+              <rect x="196" y="73" width="26" height="75" rx="10" fill="#fff176"/>
+              <path d="M209 43 C230 70 209 83 209 83 C209 83 188 68 209 43 Z" fill="#ff8a00"/>
+              <path d="M209 52 C218 67 209 74 209 74 C209 74 200 66 209 52 Z" fill="#fff7a8"/>
+
+              <rect x="133" y="90" width="20" height="58" rx="8" fill="#9cf6ff"/>
+              <path d="M143 62 C160 85 143 96 143 96 C143 96 126 84 143 62 Z" fill="#ff8a00"/>
+
+              <rect x="268" y="90" width="20" height="58" rx="8" fill="#cdb4ff"/>
+              <path d="M278 62 C295 85 278 96 278 96 C278 96 261 84 278 62 Z" fill="#ff8a00"/>
+            </g>
+
+            <ellipse cx="210" cy="314" rx="160" ry="23" fill="rgba(255,255,255,0.35)"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="birthday-line hide" id="birthdayWish">
+        Happy Birthday My Girl! 💖🎉
+      </h1>
+    </div>
+
+    <div class="knife-line" id="knifeLine"></div>
+    <button class="btn next-btn hide" id="nextBtn">Next ➜</button>
+  </section>
+
+  <!-- PAGE 3: Gallery -->
+  <section class="page" id="galleryPage">
+    <div class="glass-card">
+      <h1 class="main-title">Some beautiful images 💕</h1>
+      <p class="small-text">
+        Your beautiful photos will auto swap with music 🎶💖
+      </p>
+
+      <div class="photo-frame">
+        <img id="slideImage" alt="Birthday photo slideshow">
+      </div>
+
+      <button class="btn" id="openMessageBtn">Open My Message 💌</button>
+    </div>
+  </section>
+
+  <!-- PAGE 4: Message -->
+  <section class="page" id="messagePage">
+    <div class="message-card">
+      <h1>A Special Message For You 💌</h1>
+
+      <p>
+        “Happy Birthday to my most special and dearest friend! 🎂❤️Today, on your birthday, I want to pour my heart out and tell you exactly how much you mean to me. You hold an incredibly important place in my life, and you are truly irreplaceable. One of the things I cherish the most is how you share everything with me—your happiness, your sorrows, and your deepest thoughts. Please know that I am always here to listen to you, and I genuinely try my absolute best to understand you in every situation.I care about you more than words can ever express, and your happiness is my biggest priority. I love you so deeply, and honestly, the mere thought of ever losing you terrifies me. I cannot even imagine my life without your presence.Thank you for being my constant, my safe space, and the most beautiful part of my world. May God bless you with all the happiness you deserve. I love you so much my female friend, happy birthday! 🌍✨”
+      </p>
+
+      <button class="btn" id="vedikaBtn">Vedika</button>
+    </div>
+  </section>
+
+  <!-- PAGE 5: Purvii Birthday Page -->
+  <section class="page" id="purviiPage">
+    <div class="purvii-card">
+      <h1 class="purvii-title">HAPPY BIRTHDAY PURVII 💖🎂</h1>
+      <img src="purvii.jpg" class="purvii-img" alt="Purvii Photo">
+      <br>
+      <button class="btn" id="endBtn">End</button>
+    </div>
+  </section>
+
+  <!-- PAGE 6: End Page -->
+  <section class="page" id="endPage">
+    <h1 class="end-text">End ❤️</h1>
+  </section>
+
+  <script>
+    const defaultGalleryImages = [
+      "birthday_photos/photo1.jpg",
+      "birthday_photos/photo2.jpg",
+      "birthday_photos/photo3.jpg",
+      "birthday_photos/photo4.jpg",
+      "birthday_photos/photo5.jpg",
+      "birthday_photos/photo6.jpg",
+      "birthday_photos/photo7.jpg",
+      "birthday_photos/photo8.jpg",
+      "birthday_photos/photo9.jpg",
+      "birthday_photos/photo10.jpg",
+      "birthday_photos/photo11.jpg",
+      "birthday_photos/photo12.jpg",
+      "birthday_photos/photo13.jpg",
+      "birthday_photos/photo14.jpg",
+      "birthday_photos/photo15.jpg",
+      "birthday_photos/photo16.jpg",
+      "birthday_photos/photo17.jpg"
+    ];
+
+    const pages = document.querySelectorAll(".page");
+
+    const countdown = document.getElementById("countdown");
+    const loadingText = document.getElementById("loadingText");
+    const bornText = document.getElementById("bornText");
+    const youText = document.getElementById("youText");
+
+    const cakeWrap = document.getElementById("cakeWrap");
+    const birthdayWish = document.getElementById("birthdayWish");
+    const nextBtn = document.getElementById("nextBtn");
+    const knifeLine = document.getElementById("knifeLine");
+
+    const slideImage = document.getElementById("slideImage");
+    const openMessageBtn = document.getElementById("openMessageBtn");
+    const vedikaBtn = document.getElementById("vedikaBtn");
+    const endBtn = document.getElementById("endBtn");
+
+    const birthdayMusic = document.getElementById("birthdayMusic");
+
+    let currentImageIndex = 0;
+    let slideTimer;
+    let cakeCutDone = false;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    function showPage(pageId) {
+      pages.forEach(page => page.classList.remove("active"));
+      document.getElementById(pageId).classList.add("active");
+    }
+
+    function startCountdown() {
+      let number = 5;
+      countdown.textContent = number;
+
+      const timer = setInterval(() => {
+        number--;
+
+        if (number >= 1) {
+          countdown.textContent = number;
+        } else {
+          clearInterval(timer);
+
+          countdown.classList.add("hide");
+          loadingText.classList.remove("hide");
+
+          setTimeout(() => {
+            loadingText.classList.add("hide");
+            bornText.classList.remove("hide");
+          }, 1600);
+
+          setTimeout(() => {
+            youText.classList.remove("hide");
+          }, 2600);
+
+          setTimeout(() => {
+            showPage("cakePage");
+          }, 4400);
+        }
+      }, 1000);
+    }
+
+    function cutCake() {
+      if (cakeCutDone || !document.getElementById("cakePage").classList.contains("active")) {
+        return;
+      }
+
+      cakeCutDone = true;
+
+      knifeLine.classList.add("cut");
+      cakeWrap.style.animation = "none";
+      cakeWrap.style.transform = "scale(1.04)";
+
+      setTimeout(() => {
+        cakeWrap.style.transform = "translateY(12px) rotate(0deg) scale(0.95)";
+        birthdayWish.classList.remove("hide");
+        nextBtn.classList.remove("hide");
+      }, 650);
+    }
+
+    document.addEventListener("touchstart", function(event) {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    });
+
+    document.addEventListener("touchend", function(event) {
+      const endX = event.changedTouches[0].clientX;
+      const endY = event.changedTouches[0].clientY;
+
+      const diffX = Math.abs(endX - touchStartX);
+      const diffY = Math.abs(endY - touchStartY);
+
+      if (diffX > 45 || diffY > 45) {
+        cutCake();
+      }
+    });
+
+    let mouseDownX = 0;
+    let mouseDownY = 0;
+
+    document.addEventListener("mousedown", function(event) {
+      mouseDownX = event.clientX;
+      mouseDownY = event.clientY;
+    });
+
+    document.addEventListener("mouseup", function(event) {
+      const diffX = Math.abs(event.clientX - mouseDownX);
+      const diffY = Math.abs(event.clientY - mouseDownY);
+
+      if (diffX > 45 || diffY > 45) {
+        cutCake();
+      }
+    });
+
+    function setFallbackImage() {
+      const svg = `
+        <svg xmlns='http://www.w3.org/2000/svg' width='900' height='1100' viewBox='0 0 900 1100'>
+          <defs>
+            <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stop-color='#ff9fce'/>
+              <stop offset='55%' stop-color='#ff5ca8'/>
+              <stop offset='100%' stop-color='#7b2ff7'/>
+            </linearGradient>
+          </defs>
+
+          <rect width='900' height='1100' fill='url(#g)'/>
+          <text x='50%' y='45%' text-anchor='middle' fill='white' font-size='58' font-family='Arial' font-weight='bold'>Photo Missing</text>
+          <text x='50%' y='53%' text-anchor='middle' fill='#fff7c8' font-size='40' font-family='Arial'>Check photo name 💕</text>
+          <text x='50%' y='65%' text-anchor='middle' fill='white' font-size='90' font-family='Arial'>🎂💖✨</text>
+        </svg>
+      `;
+
+      slideImage.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function getPhotoTiming() {
+      if (birthdayMusic.duration && !isNaN(birthdayMusic.duration)) {
+        return Math.max(1500, (birthdayMusic.duration * 1000) / defaultGalleryImages.length);
+      }
+
+      return 2500;
+    }
+
+    function startSlideshow() {
+      clearInterval(slideTimer);
+
+      currentImageIndex = 0;
+      slideImage.src = defaultGalleryImages[currentImageIndex];
+
+      slideImage.onerror = function() {
+        setFallbackImage();
+      };
+
+      let photoTiming = getPhotoTiming();
+
+      slideTimer = setInterval(() => {
+        currentImageIndex = (currentImageIndex + 1) % defaultGalleryImages.length;
+
+        slideImage.style.opacity = "0";
+
+        setTimeout(() => {
+          slideImage.src = defaultGalleryImages[currentImageIndex];
+          slideImage.style.opacity = "1";
+        }, 350);
+
+      }, photoTiming);
+    }
+
+    function playMusic() {
+      birthdayMusic.currentTime = 0;
+      birthdayMusic.volume = 0.75;
+
+      birthdayMusic.play().catch(() => {
+        console.log("Music will play after user interaction.");
+      });
+    }
+
+    nextBtn.addEventListener("click", function() {
+      showPage("galleryPage");
+      playMusic();
+      startSlideshow();
+    });
+
+    openMessageBtn.addEventListener("click", function() {
+      birthdayMusic.pause();
+      showPage("messagePage");
+    });
+
+    vedikaBtn.addEventListener("click", function() {
+      showPage("purviiPage");
+    });
+
+    endBtn.addEventListener("click", function() {
+      showPage("endPage");
+    });
+
+    function createEmojiRain() {
+      const emojis = ["💖", "🎂", "✨", "🎀", "💝", "🌸", "🫶"];
+      const rain = document.getElementById("emojiRain");
+
+      for (let i = 0; i < 28; i++) {
+        const span = document.createElement("span");
+        span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        span.style.left = Math.random() * 100 + "vw";
+        span.style.animationDuration = 4 + Math.random() * 6 + "s";
+        span.style.animationDelay = Math.random() * 5 + "s";
+        span.style.fontSize = 16 + Math.random() * 18 + "px";
+        rain.appendChild(span);
+      }
+    }
+
+    createEmojiRain();
+    startCountdown();
+  </script>
+</body>
+</html>
